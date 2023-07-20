@@ -35,6 +35,23 @@
   </nav>
 
   <main class="container py-4">
+    <!-- display messages -->
+    {% if messages %}
+      {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+          {{ message }}
+        </div>
+      {% endfor %}
+      <script>
+        // Automatically remove messages after 1 second
+        setTimeout(function() {
+          document.querySelectorAll('.alert').forEach(function(alert) {
+            alert.remove();
+          });
+        }, 1000);
+      </script>
+    {% endif %}
+
     <!-- Main content -->
     {% block content %}
     <!-- This block will be filled by child templates -->
