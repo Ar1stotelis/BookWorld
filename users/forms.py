@@ -22,3 +22,10 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['birth_date']
+
+class UserUpdateForm(forms.ModelForm):
+    email = forms.EmailField()
+
+    class Meta:
+        model = User
+        fields = ['username', 'email']

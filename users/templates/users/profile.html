@@ -5,7 +5,8 @@
   <h2>Profile</h2>
   <form method="POST">
     {% csrf_token %}
-    {{ form|crispy }}
+    {{ user_form|crispy }}
+    {{ profile_form|crispy }}
     <button type="submit">Update</button>
   </form>
 {% endblock %}
