@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% load static %}
+{% block title %}Catalogue{% endblock %}
+
+<link rel="stylesheet" href="{% static 'books/styles.css' %}">
+
+{% block content %}
+  <h1>Book Catalogue</h1>
+
+  <!-- Filter form -->
+  <form id="filterForm" method="get">
+    <p>Name:</p>
+    {{ filter_form.query }}
+    <p>Category:</p>
+    {{ filter_form.category }}
+    <button type="submit">Search</button>
+  </form>
+
+  <ul>
+    {% for book in books %}
+      <li class="book-item">
+        {% if book.image %}
+          <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-image">
+        {% endif %}
+        <div class="book-info">
+          <h3><a href="{% url 'books:book_detail' book.id %}">{{ book.title }}</a></h3>
+          <p>Author: {{ book.author }}</p>
+          <p>Categories:
+            {% for category in book.categories.all %}
+              {{ category.name }}{% if not forloop.last %}, {% endif %}
+            {% empty %}
+              No categories
+            {% endfor %}
+          </p>
+          {% if user.is_authenticated and user.is_staff %}
+            <a href="{% url 'books:delete_book' book.id %}">Delete</a>
+          {% endif %}
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+
+  {% if user.is_authenticated and user.is_staff %}
+    <a href="{% url 'books:add_book' %}">Add Book</a>
+  {% endif %}
+{% endblock %}

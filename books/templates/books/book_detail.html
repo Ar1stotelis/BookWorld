@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ book.title }}{% endblock %}
+
+{% block content %}
+  <h1>{{ book.title }}</h1>
+  <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-image">
+  <p>Author: {{ book.author }}</p>
+  <p>Categories:
+    {% for category in book.categories.all %}
+      {{ category.name }}{% if not forloop.last %}, {% endif %}
+    {% empty %}
+      No categories
+    {% endfor %}
+  </p>
+  <p>{{ book.description }}</p>
+{% endblock %}
