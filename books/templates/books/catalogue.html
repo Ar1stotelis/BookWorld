@@ -13,6 +13,18 @@
     #filterForm input {
       width: 100%;
     }
+    #filterForm select,
+    #filterForm input {
+      width: 100%;
+    }
+    #filterForm {
+      margin-bottom: 2rem;  /* Add bottom margin to the form */
+    }
+    @media (min-width: 992px) {
+      .book-description {
+        display: block;
+      }
+    }
   </style>
 </head>
 <body>
@@ -60,29 +72,33 @@
       </div>
     </form>
 
-    <ul id="bookList">
+    <div class="row" id="bookList">
       {% for book in books %}
-        <li class="book-item">
-          {% if book.image %}
-            <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-image">
-          {% endif %}
-          <div class="book-info">
-            <h3><a href="{% url 'books:book_detail' book.id %}">{{ book.title }}</a></h3>
-            <p>Author: {{ book.author }}</p>
-            <p>Categories:
-              {% for category in book.categories.all %}
-                {{ category.name }}{% if not forloop.last %}, {% endif %}
-              {% empty %}
-                No categories
-              {% endfor %}
-            </p>
-            {% if user.is_authenticated and user.is_staff %}
-              <a href="{% url 'books:delete_book' book.id %}">Delete</a>
+        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">  <!-- Bootstrap classes for responsive grid -->
+          <div class="book-item">
+            {% if book.image %}
+              <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-image">
             {% endif %}
+            <div class="book-info">
+              <h3><a href="{% url 'books:book_detail' book.id %}">{{ book.title }}</a></h3>
+              <p>Author: {{ book.author }}</p>
+              <p>Categories:
+                {% for category in book.categories.all %}
+                  {{ category.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                  No categories
+                {% endfor %}
+              </p>
+              <p class="book-description" style="display: none;">{{ book.description }}</p>  <!-- Add this line -->
+              {% if user.is_authenticated and user.is_staff %}
+                <a href="{% url 'books:delete_book' book.id %}">Delete</a>
+              {% endif %}
+            </div>
+
           </div>
-        </li>
+        </div>
       {% endfor %}
-    </ul>
+    </div>
 
     {% if user.is_authenticated and user.is_staff %}
       <a href="{% url 'books:add_book' %}">Add Book</a>
@@ -115,12 +131,11 @@
           success: function(data) {
             var newBookList = $(data).find('#bookList').html();
             $('#bookList').html(newBookList);
-        }
-
-
+          }
         });
       });
     });
-</script>
+  </script>
+
 </body>
 </html>
