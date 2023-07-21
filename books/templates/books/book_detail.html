@@ -87,7 +87,7 @@
     </div>
   </main>
 
-  <script>
+ <script>
     function getCookie(name) {
       var cookieValue = null;
       if (document.cookie && document.cookie !== '') {
@@ -106,7 +106,26 @@
     var csrftoken = getCookie('csrftoken');
 
     $(document).ready(function() {
-      //...rest of your jQuery code...
+      let $starWrapper = $("div.star-wrapper");
+      let $stars = $starWrapper.find("i");
+
+      // Star hover effect
+      $stars.on("mouseover", function () {
+        let index = $(this).index();
+        $stars.slice(0, index + 1).removeClass("fa-star-o").addClass("fa-star");
+        $stars.slice(index + 1).removeClass("fa-star").addClass("fa-star-o");
+      });
+
+      $starWrapper.on("mouseleave", function () {
+        $stars.removeClass("fa-star").addClass("fa-star-o");
+        $stars.slice(0, $('#ratingInput').val()).removeClass("fa-star-o").addClass("fa-star");
+      });
+
+      // Star click effect
+      $stars.on("click", function () {
+        let rating = $(this).index() + 1;
+        $('#ratingInput').val(rating);
+      });
 
       // Rating form submission
       $('#ratingForm').on('submit', function(event) {

@@ -1,49 +1,126 @@
-{% extends 'base.html' %}
-
 {% load static %}
-{% block title %}Catalogue{% endblock %}
-
-<link rel="stylesheet" href="{% static 'books/styles.css' %}">
-
-{% block content %}
-  <div class="container">
-        <h1>Book Catalogue</h1>
-
-        <!-- Filter form -->
-        <form id="filterForm" method="get">
-          <p>Name:</p>
-          {{ filter_form.query }}
-          <p>Category:</p>
-          {{ filter_form.category }}
-          <button type="submit">Search</button>
-        </form>
-
-        <ul>
-          {% for book in books %}
-            <li class="book-item">
-              {% if book.image %}
-                <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-image">
-              {% endif %}
-              <div class="book-info">
-                <h3><a href="{% url 'books:book_detail' book.id %}">{{ book.title }}</a></h3>
-                <p>Author: {{ book.author }}</p>
-                <p>Categories:
-                  {% for category in book.categories.all %}
-                    {{ category.name }}{% if not forloop.last %}, {% endif %}
-                  {% empty %}
-                    No categories
-                  {% endfor %}
-                </p>
-                {% if user.is_authenticated and user.is_staff %}
-                  <a href="{% url 'books:delete_book' book.id %}">Delete</a>
-                {% endif %}
-              </div>
-            </li>
-          {% endfor %}
-        </ul>
-
-        {% if user.is_authenticated and user.is_staff %}
-          <a href="{% url 'books:add_book' %}">Add Book</a>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookWorld - Catalogue</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'books/styles.css' %}">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+  <style>
+    #filterForm select,
+    #filterForm input {
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">BookWorld</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'books:catalogue' %}">Catalogue</a>
+        </li>
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+          </li>
         {% endif %}
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container" id="mainContent">
+    <h1>Book Catalogue</h1>
+
+    <!-- Filter form -->
+    <form id="filterForm" method="get" class="row">
+      <div class="col-md-6">
+        <label for="queryInput">Name:</label>
+        {{ filter_form.query }}
       </div>
-{% endblock %}
+      <div class="col-md-6">
+        <label for="categorySelect">Category:</label>
+        {{ filter_form.category }}
+      </div>
+    </form>
+
+    <ul id="bookList">
+      {% for book in books %}
+        <li class="book-item">
+          {% if book.image %}
+            <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-image">
+          {% endif %}
+          <div class="book-info">
+            <h3><a href="{% url 'books:book_detail' book.id %}">{{ book.title }}</a></h3>
+            <p>Author: {{ book.author }}</p>
+            <p>Categories:
+              {% for category in book.categories.all %}
+                {{ category.name }}{% if not forloop.last %}, {% endif %}
+              {% empty %}
+                No categories
+              {% endfor %}
+            </p>
+            {% if user.is_authenticated and user.is_staff %}
+              <a href="{% url 'books:delete_book' book.id %}">Delete</a>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+
+    {% if user.is_authenticated and user.is_staff %}
+      <a href="{% url 'books:add_book' %}">Add Book</a>
+    {% endif %}
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      // Get the form elements
+      var $queryInput = $("#filterForm input[name='query']");
+      var $categorySelect = $("#filterForm select[name='category']");
+
+      // Event handler for the query input field
+      $queryInput.on('input', function() {
+        $('#filterForm').submit();
+      });
+
+      // Event handler for the category select field
+      $categorySelect.on('change', function() {
+        $('#filterForm').submit();
+      });
+
+      // AJAX for form submission
+      $('#filterForm').on('submit', function(event) {
+        event.preventDefault();
+        $.ajax({
+          url: "{% url 'books:catalogue' %}",
+          type: 'get',
+          data: $(this).serialize(),
+          success: function(data) {
+            var newBookList = $(data).find('#bookList').html();
+            $('#bookList').html(newBookList);
+        }
+
+
+        });
+      });
+    });
+</script>
+</body>
+</html>
