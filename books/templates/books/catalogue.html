@@ -13,10 +13,6 @@
     #filterForm input {
       width: 100%;
     }
-    #filterForm select,
-    #filterForm input {
-      width: 100%;
-    }
     #filterForm {
       margin-bottom: 2rem;  /* Add bottom margin to the form */
     }
@@ -24,6 +20,17 @@
       .book-description {
         display: block;
       }
+      .book-item {
+        display: flex;
+        flex-direction: column;
+      }
+      .book-image {
+        object-fit: cover;
+      }
+      .book-info {
+        overflow: auto;
+      }
+
     }
   </style>
 </head>
@@ -94,7 +101,6 @@
                 <a href="{% url 'books:delete_book' book.id %}">Delete</a>
               {% endif %}
             </div>
-
           </div>
         </div>
       {% endfor %}

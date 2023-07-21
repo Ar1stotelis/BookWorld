@@ -1,20 +1,3 @@
-.book-item {
-    display: flex;
-    align-items: start;
-    margin-bottom: 20px;  /* Add some space at the bottom of each book item */
-  }
-
-  .book-image {
-    width: 125px;
-    height: 150px;
-    object-fit: contain;
-    margin-right: 20px;  /* Add some space at the right of the image */
-  }
-
-  .book-info {
-    flex-grow: 1;
-    overflow: auto;
-  }
 
   ul {
     list-style-type: none;  /* This removes the bullets */
