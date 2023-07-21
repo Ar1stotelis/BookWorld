@@ -1,17 +1,156 @@
-{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
 
-{% block title %}{{ book.title }}{% endblock %}
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BookWorld - {{ book.title }}</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{% static 'books/styles.css' %}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="{% url 'books:catalogue' %}">BookWorld</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'books:catalogue' %}">Catalogue</a>
+        </li>
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
 
-{% block content %}
-  <h1>{{ book.title }}</h1>
-  <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-detail-image">
-  <p>Author: {{ book.author }}</p>
-  <p>Categories:
-    {% for category in book.categories.all %}
-      {{ category.name }}{% if not forloop.last %}, {% endif %}
-    {% empty %}
-      No categories
-    {% endfor %}
-  </p>
-  <p>{{ book.description }}</p>
-{% endblock %}
+  <main class="container py-4">
+    <h1>{{ book.title }}</h1>
+    <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-detail-image">
+    <p>Author: {{ book.author }}</p>
+    <p>Categories:
+      {% for category in book.categories.all %}
+        {{ category.name }}{% if not forloop.last %}, {% endif %}
+      {% empty %}
+        No categories
+      {% endfor %}
+    </p>
+    <p>{{ book.description }}</p>
+
+    {% if user.is_authenticated %}
+    <form id="ratingForm">
+      <div class="rating-wrapper">
+        <div class="star-wrapper">
+          <i class="fa fa-star-o"></i>
+          <i class="fa fa-star-o"></i>
+          <i class="fa fa-star-o"></i>
+          <i class="fa fa-star-o"></i>
+          <i class="fa fa-star-o"></i>
+        </div>
+      </div>
+      <input type="hidden" name="rating" id="ratingInput">
+      <textarea name="comment" placeholder="Write a comment..."></textarea>
+      <button type="submit">Submit Rating</button>
+    </form>
+    {% endif %}
+
+    <div id="commentsList">
+      <ul>
+        {% for rating in ratings %}
+        <li id="comment-{{ rating.id }}">
+          <strong>{{ rating.user.username }}:</strong>
+          <p>Rating: {{ rating.rating }}</p>
+          <p>Comment: {{ rating.comment }}</p>
+          {% if user.is_staff or rating.user.id == user.id %}
+          <button class="btn btn-danger delete-comment" data-rating-id="{{ rating.id }}">Remove</button>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </main>
+
+  <script>
+    $(document).ready(function() {
+      let $starWrapper = $("div.star-wrapper");
+      let $stars = $starWrapper.find("i");
+
+      // Star hover effect
+      $stars.on("mouseover", function () {
+        let index = $(this).index();
+        $stars.slice(0, index + 1).removeClass("fa-star-o").addClass("fa-star");
+        $stars.slice(index + 1).removeClass("fa-star").addClass("fa-star-o");
+      });
+
+      $starWrapper.on("mouseleave", function () {
+        $stars.removeClass("fa-star").addClass("fa-star-o");
+        $stars.slice(0, $('#ratingInput').val()).removeClass("fa-star-o").addClass("fa-star");
+      });
+
+      // Star click effect
+      $stars.on("click", function () {
+        let rating = $(this).index() + 1;
+        $('#ratingInput').val(rating);
+      });
+
+      // Rating form submission
+      $('#ratingForm').on('submit', function(event) {
+        event.preventDefault();
+        var rating = $('#ratingInput').val();
+        var comment = $('textarea[name="comment"]').val();
+        $.ajax({
+            type: "POST",
+            url: "/books/book/13/",
+            headers:{"X-CSRFToken": 'k9VA0VY5j5QVChLb9dtaHWuu6NWPNZciHdLVqrCjzsrev2F99pyGJOmVbI4kOYUA'},
+            data: {
+                'rating': rating,
+                'comment': comment,
+            },
+            success: function(data) {
+                $('#commentsList ul').append('<li id="comment-' + data.ratingId + '"><strong>' + data.username + ':</strong><p>Rating: ' + data.rating + '</p><p>Comment: ' + data.comment + '</p><button class="btn btn-danger delete-comment" data-rating-id="' + data.ratingId + '">Remove</button></li>');
+                // Reset the form after submitting
+                $('#ratingInput').val("");
+                $('textarea[name="comment"]').val("");
+                $stars.removeClass("fa-star").addClass("fa-star-o");
+            }
+        });
+      });
+
+      // Delete comment button
+      $(document).on('click', ".delete-comment", function() {
+        var ratingId = $(this).data('rating-id');
+        $.ajax({
+            type: "DELETE",
+            url: "/books/book/delete_comment/",
+            headers: {"X-CSRFToken": 'k9VA0VY5j5QVChLb9dtaHWuu6NWPNZciHdLVqrCjzsrev2F99pyGJOmVbI4kOYUA'},
+            contentType: "application/json",
+            data: JSON.stringify({
+                'rating_id': ratingId,
+            }),
+            success: function() {
+                $('#comment-' + ratingId).remove();
+            }
+        });
+      });
+    });
+    </script>
+
+</body>
+</html>

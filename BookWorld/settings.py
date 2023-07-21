@@ -30,7 +30,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'home',
-    'books',
+    'books.apps.BooksConfig',
     'users',
     'crispy_forms',
     'crispy_bootstrap4',
