@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+  <!-- Hero Section -->
+  <section class="hero bg-light py-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-7">
+          <h1 class="display-4">Welcome to BookWorld!</h1>
+          <p class="lead">Your one-stop platform for all your book needs.</p>
+          <hr class="my-4">
+          <p>Start exploring our catalogue now.</p>
+          <a class="btn btn-primary btn-lg" href="{% url 'books:catalogue' %}" role="button">Explore Catalogue</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer mt-auto py-3 bg-light">
+    <div class="container">
+      <span class="text-muted">© 2023 BookWorld. All rights reserved.</span>
+    </div>
+  </footer>
+{% endblock %}
