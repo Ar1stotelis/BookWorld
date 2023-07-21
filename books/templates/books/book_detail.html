@@ -88,27 +88,25 @@
   </main>
 
   <script>
+    function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = cookies[i].trim();
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+    }
+
+    var csrftoken = getCookie('csrftoken');
+
     $(document).ready(function() {
-      let $starWrapper = $("div.star-wrapper");
-      let $stars = $starWrapper.find("i");
-
-      // Star hover effect
-      $stars.on("mouseover", function () {
-        let index = $(this).index();
-        $stars.slice(0, index + 1).removeClass("fa-star-o").addClass("fa-star");
-        $stars.slice(index + 1).removeClass("fa-star").addClass("fa-star-o");
-      });
-
-      $starWrapper.on("mouseleave", function () {
-        $stars.removeClass("fa-star").addClass("fa-star-o");
-        $stars.slice(0, $('#ratingInput').val()).removeClass("fa-star-o").addClass("fa-star");
-      });
-
-      // Star click effect
-      $stars.on("click", function () {
-        let rating = $(this).index() + 1;
-        $('#ratingInput').val(rating);
-      });
+      //...rest of your jQuery code...
 
       // Rating form submission
       $('#ratingForm').on('submit', function(event) {
@@ -118,14 +116,13 @@
         $.ajax({
             type: "POST",
             url: "/books/book/13/",
-            headers:{"X-CSRFToken": 'k9VA0VY5j5QVChLb9dtaHWuu6NWPNZciHdLVqrCjzsrev2F99pyGJOmVbI4kOYUA'},
+            headers: {"X-CSRFToken": csrftoken},
             data: {
                 'rating': rating,
                 'comment': comment,
             },
             success: function(data) {
                 $('#commentsList ul').append('<li id="comment-' + data.ratingId + '"><strong>' + data.username + ':</strong><p>Rating: ' + data.rating + '</p><p>Comment: ' + data.comment + '</p><button class="btn btn-danger delete-comment" data-rating-id="' + data.ratingId + '">Remove</button></li>');
-                // Reset the form after submitting
                 $('#ratingInput').val("");
                 $('textarea[name="comment"]').val("");
                 $stars.removeClass("fa-star").addClass("fa-star-o");
@@ -139,7 +136,7 @@
         $.ajax({
             type: "DELETE",
             url: "/books/book/delete_comment/",
-            headers: {"X-CSRFToken": 'k9VA0VY5j5QVChLb9dtaHWuu6NWPNZciHdLVqrCjzsrev2F99pyGJOmVbI4kOYUA'},
+            headers: {"X-CSRFToken": csrftoken},
             contentType: "application/json",
             data: JSON.stringify({
                 'rating_id': ratingId,
