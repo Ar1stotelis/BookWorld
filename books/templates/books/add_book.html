@@ -12,7 +12,7 @@
 </head>
 <body>
   <nav class="navbar navbar-expand-lg navbar-light bg-light">
-    <a class="navbar-brand" href="#">BookWorld</a>
+    <a class="navbar-brand" href="{% url 'home' %}">BookWorld</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
@@ -78,29 +78,31 @@
       $("form").on('submit', function(e) {
         e.preventDefault();
         var formId = $(this).attr('id');
+        var formData = new FormData(this);  // Create a FormData object from the form
         $.ajax({
           type: 'POST',
           url: $(this).attr('action'),
-          data: $(this).serialize(),
+          data: formData,
+          processData: false,  // Tell jQuery not to process the data
+          contentType: false,  // Tell jQuery not to set contentType
           success: function(response) {
-            if (response.status === 'success' || response.id) {
-              var message = 'Operation successful';
-              if (formId === 'add-category-form') {
-                message = 'Category added';
-              } else if (formId === 'delete-category-form') {
-                message = 'Category deleted';
-              }
-              $('#message').html('<div class="alert alert-success">' + message + '</div>');
-              if (formId === 'delete-category-form' || formId === 'add-category-form') {
-                location.reload();  // Refresh page to update categories dropdown
-              }
-            } else {
-              $('#message').html('<div class="alert alert-danger">' + response.error + '</div>');
+            var message = response.status === 'success' || response.id ? 'Operation successful' : response.error;
+            if (formId === 'add-category-form') {
+              message = 'Category added';
+            } else if (formId === 'delete-category-form') {
+              message = 'Category deleted';
+            }
+            $('#message').html('<div class="alert alert-' + (response.error ? 'danger' : 'success') + '">' + message + '</div>');
+            if (formId === 'add-book-form' && !response.error) {
+              window.location.href = "{% url 'books:catalogue' %}";
+            } else if (formId === 'delete-category-form' || formId === 'add-category-form') {
+              location.reload();  // Refresh page to update categories dropdown
             }
           }
         });
       });
     });
   </script>
+
 </body>
 </html>

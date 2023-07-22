@@ -39,11 +39,12 @@ def add_book(request):
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)
-def delete_book(request, book_id):
-    book = get_object_or_404(Book, pk=book_id)
+def delete_book(request, pk):
+    book = get_object_or_404(Book, pk=pk)
+    if book.image:  # Check if the image exists before trying to delete it
+        book.image.delete(save=False)
     book.delete()
     return redirect('books:catalogue')
-
 
 
 def book_detail(request, book_id):
