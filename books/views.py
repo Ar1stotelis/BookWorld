@@ -3,9 +3,10 @@ from json import JSONDecodeError
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.views.decorators.http import require_http_methods
-from .models import Book, Rating
+from .models import Book, Rating, Category
 from .forms import BookForm, BookFilterForm, RatingForm
 from django.http import JsonResponse
+from django.contrib import messages
 
 
 def catalogue(request):
@@ -33,7 +34,8 @@ def add_book(request):
             return redirect('books:catalogue')
     else:
         form = BookForm()
-    return render(request, 'books/add_book.html', {'form': form})
+    categories = Category.objects.all()  # Fetch categories
+    return render(request, 'books/add_book.html', {'form': form, 'categories': categories})  # Add categories to context
 
 @login_required
 @user_passes_test(lambda u: u.is_staff)
@@ -92,3 +94,34 @@ def delete_comment(request):
             return JsonResponse({'status': 'fail', 'message': 'Invalid data'}, status=400)
     else:
         return JsonResponse({'status': 'fail', 'message': 'No data provided'}, status=400)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def add_category(request):
+    if request.method == 'POST':
+        name = request.POST.get('name')
+        if name:
+            category, created = Category.objects.get_or_create(name=name)
+            if created:
+                return JsonResponse({'status': 'success'}, status=201)
+            else:
+                return JsonResponse({'error': 'Category already exists'}, status=400)
+        else:
+            return JsonResponse({'error': 'Invalid category name'}, status=400)
+
+@login_required
+@user_passes_test(lambda u: u.is_staff)
+def delete_category(request):
+    if request.method == 'POST':
+        category_id = request.POST.get('category_id')
+        if category_id:
+            try:
+                category = Category.objects.get(id=category_id)
+                if Book.objects.filter(categories__id=category_id).exists():
+                    return JsonResponse({'error': 'Category is being used by a book and cannot be deleted'}, status=400)
+                category.delete()
+                return JsonResponse({'status': 'success'}, status=200)
+            except Category.DoesNotExist:
+                return JsonResponse({'error': 'Category does not exist'}, status=404)
+        else:
+            return JsonResponse({'error': 'Invalid category id'}, status=400)

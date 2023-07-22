@@ -1,13 +1,106 @@
-{% extends 'base.html' %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Book</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
 
-{% block title %}Add Book{% endblock %}
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+  <link rel="stylesheet" href="{% static 'books/styles.css' %}">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <a class="navbar-brand" href="#">BookWorld</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+          <a class="nav-link" href="{% url 'books:catalogue' %}">Catalogue</a>
+        </li>
+        {% if user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:profile' %}">Profile</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:logout' %}">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:register' %}">Register</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'users:login' %}">Login</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </nav>
 
-{% block content %}
-  <h1>Add Book</h1>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
+  <main class="container py-4">
+    <h1>Add Book</h1>
 
-    <input type="submit" value="Save">
-  </form>
-{% endblock %}
+    <div id="message"></div>
+
+    <form id="add-book-form" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <input type="submit" value="Save">
+    </form>
+
+    <h2>Add Category</h2>
+    <form id="add-category-form" method="post" action="{% url 'books:add_category' %}">
+      {% csrf_token %}
+      <label for="name">Category Name:</label>
+      <input type="text" id="name" name="name">
+      <input type="submit" value="Add Category">
+    </form>
+
+    <h2>Delete Category</h2>
+    <form id="delete-category-form" method="post" action="{% url 'books:delete_category' %}">
+      {% csrf_token %}
+      <label for="category_id">Select Category:</label>
+      <select id="category_id" name="category_id">
+        {% for category in categories %}
+          <option value="{{ category.id }}">{{ category.name }}</option>
+        {% endfor %}
+      </select>
+      <input type="submit" value="Delete Category">
+    </form>
+  </main>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script>
+    $(document).ready(function () {
+      $("form").on('submit', function(e) {
+        e.preventDefault();
+        var formId = $(this).attr('id');
+        $.ajax({
+          type: 'POST',
+          url: $(this).attr('action'),
+          data: $(this).serialize(),
+          success: function(response) {
+            if (response.status === 'success' || response.id) {
+              var message = 'Operation successful';
+              if (formId === 'add-category-form') {
+                message = 'Category added';
+              } else if (formId === 'delete-category-form') {
+                message = 'Category deleted';
+              }
+              $('#message').html('<div class="alert alert-success">' + message + '</div>');
+              if (formId === 'delete-category-form' || formId === 'add-category-form') {
+                location.reload();  // Refresh page to update categories dropdown
+              }
+            } else {
+              $('#message').html('<div class="alert alert-danger">' + response.error + '</div>');
+            }
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
