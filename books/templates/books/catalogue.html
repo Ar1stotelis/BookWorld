@@ -97,7 +97,7 @@
                   No categories
                 {% endfor %}
               </p>
-              <p class="book-description" style="display: none;">{{ book.description }}</p>  <!-- Add this line -->
+              <p class="book-description" style="display: none;">{{ book.description }}</p>
               {% if user.is_authenticated and user.is_staff %}
                 <a href="{% url 'books:delete_book' book.id %}">Delete</a>
               {% endif %}
