@@ -41,7 +41,7 @@
     </div>
   </nav>
 
-  <main class="container py-4">
+  <main class="container py-4" data-book-id="{{ book.id }}">
     <h1>{{ book.title }}</h1>
     <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-detail-image">
     <p>Author: {{ book.author }}</p>
@@ -106,6 +106,7 @@
     var csrftoken = getCookie('csrftoken');
 
     $(document).ready(function() {
+      var bookId = $('main').data('book-id');
       let $starWrapper = $("div.star-wrapper");
       let $stars = $starWrapper.find("i");
 
@@ -134,7 +135,7 @@
         var comment = $('textarea[name="comment"]').val();
         $.ajax({
             type: "POST",
-            url: "/books/book/13/",
+            url: "/books/book/" + bookId + "/",
             headers: {"X-CSRFToken": csrftoken},
             data: {
                 'rating': rating,
@@ -154,7 +155,7 @@
         var ratingId = $(this).data('rating-id');
         $.ajax({
             type: "DELETE",
-            url: "/books/book/delete_comment/",
+            url: "/books/book/" + bookId + "/delete_comment/",
             headers: {"X-CSRFToken": csrftoken},
             contentType: "application/json",
             data: JSON.stringify({
