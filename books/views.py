@@ -80,7 +80,8 @@ def book_detail(request, book_id):
 
 @login_required
 @require_http_methods(["DELETE"])
-def delete_comment(request):
+def delete_comment(request, book_id):
+
     if request.body:  # check if body is not empty
         try:
             data = json.loads(request.body)
