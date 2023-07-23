@@ -79,17 +79,18 @@
       </div>
     </form>
 
+
     <div class="row" id="bookList">
       {% for book in books %}
-        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12">  <!-- Bootstrap classes for responsive grid -->
+        <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 mb-4">  <!-- Bootstrap classes for responsive grid, added margin-bottom -->
           <div class="book-item">
             {% if book.image %}
               <img src="{{ book.image.url }}" alt="{{ book.title }} Image" class="book-image">
             {% endif %}
             <div class="book-info">
               <h3><a href="{% url 'books:book_detail' book.id %}">{{ book.title }}</a></h3>
-              <p>Author: {{ book.author }}</p>
-              <p>Categories:
+              <p><strong>Author:</strong> {{ book.author }}</p>
+              <p><strong>Categories:</strong>
                 {% for category in book.categories.all %}
                   {{ category.name }}{% if not forloop.last %}, {% endif %}
                 {% empty %}
